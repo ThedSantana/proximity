@@ -34,6 +34,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -170,11 +171,12 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
                 isCustomer = true;
                 //retrieve geofence places and create
                 ParseQuery<ParseObject> query = ParseQuery.getQuery("Places");
+                query.orderByDescending("Time");
                 query.getFirstInBackground(new GetCallback<ParseObject>() {
                     public void done(ParseObject object, ParseException e) {
                         if (e == null) {
-                            double lat = object.getInt("Lat");
-                            double lng = object.getInt("Lng");
+                            double lat = object.getDouble("Lat");
+                            double lng = object.getDouble("Lng");
                             mPointsOfInterest.put((String)object.get("Name"), new LatLng(lat, lng));
                             startGeofencing();
                         } else {
@@ -190,6 +192,7 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
                 parseObject.put("Radius", placeRadius);
                 parseObject.put("Lat", latLng.latitude);
                 parseObject.put("Lng", latLng.longitude);
+                parseObject.put("Time", new Date());
                 parseObject.saveInBackground();
                 mPointsOfInterest.put(placeName, latLng);
             }
