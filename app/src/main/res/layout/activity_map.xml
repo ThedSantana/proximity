@@ -1,0 +1,16 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <Button android:layout_width="100dp" android:layout_height="100dp"
+            android:id="@+id/btn_create_geofences"/>
+
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:id="@+id/map"
+          tools:context=".MapActivity"
+          android:name="com.google.android.gms.maps.SupportMapFragment"/>
+</FrameLayout>
