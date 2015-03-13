@@ -83,7 +83,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
 
         // Get the transition type.
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        final int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -103,28 +103,25 @@ public class GeofenceTransitionsIntentService extends IntentService {
             sendNotification(geofenceTransitionDetails);
             Log.i(TAG, geofenceTransitionDetails);
 
-            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                //increment people count
-                ParseQuery<ParseObject> query = ParseQuery.getQuery("PeopleCount");
-                query.whereEqualTo("Place", triggeringGeofences.get(0).getRequestId());
-                query.getFirstInBackground(new GetCallback<ParseObject>() {
-                    public void done(ParseObject object, ParseException e) {
-                        if (e == null) {
-                            int count = object.getInt("People");
+            //increment people count
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("PeopleCount");
+            query.whereEqualTo("Place", triggeringGeofences.get(0).getRequestId());
+            query.getFirstInBackground(new GetCallback<ParseObject>() {
+                public void done(ParseObject object, ParseException e) {
+                    if (e == null) {
+                        int count = object.getInt("People");
+                        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                             ++count;
-                            object.put("People", count);
-                            object.saveInBackground();
                         } else {
-                            int count = object.getInt("People");
                             --count;
-                            object.put("People", count);
-                            object.saveInBackground();
                         }
+                        object.put("People", count);
+                        object.saveInBackground();
+                    } else {
+                        //error
                     }
-                });
-            } else {
-                //decrement people count
-            }
+                }
+            });
         } else {
             // Log the error.
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
