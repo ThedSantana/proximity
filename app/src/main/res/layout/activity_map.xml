@@ -4,7 +4,9 @@
     android:layout_width="match_parent">
 
     <Button android:layout_width="100dp" android:layout_height="100dp"
-            android:id="@+id/btn_create_geofences"/>
+            android:background="@mipmap/ic_launcher"
+            android:id="@+id/btn_open_stats"
+            />
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"

@@ -1,10 +1,18 @@
 package com.yahoo.myapp.proximity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +30,27 @@ public class UserLandingActivity extends ActionBarActivity {
         setContentView(R.layout.activity_user_landing);
         mLvPlaces = (ListView) findViewById(R.id.lvPlaces);
         mPlaces = new ArrayList<String>();
-        mPlaces.add("Place#1");
-        mPlaces.add("Place#2");
-        mPlacesAdapter = new PlacesAdapter(this, R.layout.item_place, mPlaces);
-        mLvPlaces.setAdapter(mPlacesAdapter);
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Places");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> parseObjects, ParseException e) {
+                for (ParseObject parseObject : parseObjects) {
+                    mPlaces.add((String) parseObject.get("Name"));
+                    mPlacesAdapter = new PlacesAdapter(UserLandingActivity.this,
+                            R.layout.item_place, mPlaces);
+                    mLvPlaces.setAdapter(mPlacesAdapter);
+                }
+            }
+        });
+
+        mLvPlaces.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(UserLandingActivity.this, StatsActivity.class);
+                i.putExtra("placetitle", mPlaces.get(position));
+                startActivity(i);
+            }
+        });
     }
 
 

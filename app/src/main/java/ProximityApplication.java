@@ -13,8 +13,6 @@ public class ProximityApplication extends Application {
         super.onCreate();
         Parse.initialize(this, "8qVrolqigtbUZb8ZLz5ZB5DOOxwxDCGu7CKIb0oz",
                 "kLgkc5nmvkHTqyE64JSnPDXGNFgKeZdAg4l6wFpj");
-        ParseObject testObject = new ParseObject("TestObject");
-        testObject.put("foo", "bar");
-        testObject.saveInBackground();
     }
+
 }

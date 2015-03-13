@@ -53,26 +53,28 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
 
     private PendingIntent mGeofencePendingIntent;
 
+    private String placeName;
+    private int placeRadius;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         buildGoogleApiClient();
         setUpMapIfNeeded();
-        createPointsOfInterest();
+        placeName = getIntent().getStringExtra("Place");
+        placeRadius = getIntent().getIntExtra("Radius", 100);
+        mPointsOfInterest = new HashMap<String, Location>();
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
         mGeofencePendingIntent = null;
 
-        createGeofences = (Button) findViewById(R.id.btn_create_geofences);
-        createGeofences.setOnClickListener(new View.OnClickListener() {
+        Button goToStats = (Button) findViewById(R.id.btn_open_stats);
+        goToStats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createGeoFences();
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        getGeofencingRequest(),
-                        getGeofencePendingIntent()
-                ).setResultCallback(MapActivity.this);
+                Intent i = new Intent(MapActivity.this, StatsActivity.class);
+                i.putExtra("placetitle", placeName);
+                startActivity(i);
             }
         });
     }
@@ -146,10 +148,19 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
         Log.w(TAG, "Google APIclient onConnected");
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-            updateUI();
             LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(latLng.latitude, latLng.longitude))
+                    .title("Marker" + mCounter));
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
             mMap.animateCamera(cameraUpdate);
+
+            createGeoFences();
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(MapActivity.this);
         }
         createLocationRequest();
         startLocationUpdates();
@@ -185,25 +196,13 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        mPointsOfInterest.put("ABC", mLastLocation);
-        updateUI();
-    }
-
-    private void updateUI() {
         Toast.makeText(this,
-                "Location changed to-" + mLastLocation.getLatitude() + "," + mLastLocation.getLongitude(),
+                "Last location-" + mLastLocation.getLatitude() + "," + mLastLocation.getLongitude(),
                 Toast.LENGTH_SHORT).show();
-        ++mCounter;
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                .title("Marker" + mCounter));
-    }
-
-    private void createPointsOfInterest() {
-        mPointsOfInterest = new HashMap<String, Location>();
     }
 
     private void createGeoFences() {
+        mPointsOfInterest.put(placeName, mLastLocation);
         mGeofenceList = new ArrayList<Geofence>(mPointsOfInterest.size());
         Iterator<Map.Entry<String, Location>> iter = mPointsOfInterest.entrySet().iterator();
         while(iter.hasNext()) {
@@ -215,12 +214,9 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
                     .setCircularRegion(
                             entry.getValue().getLatitude(),
                             entry.getValue().getLongitude(),
-                            //SyncStateContract.Constants.GEOFENCE_RADIUS_IN_METERS
-                            100
+                            placeRadius
                     )
-                    .setExpirationDuration(
-                            //SyncStateContract.Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                            60000)
+                    .setExpirationDuration(60000)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                             Geofence.GEOFENCE_TRANSITION_EXIT)
                     .setLoiteringDelay(1000)
