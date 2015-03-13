@@ -31,6 +31,10 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.yahoo.myapp.proximity.GeofenceErrorMessages;
 import com.yahoo.myapp.proximity.R;
 
@@ -98,6 +102,29 @@ public class GeofenceTransitionsIntentService extends IntentService {
             // Send notification and log the transition details.
             sendNotification(geofenceTransitionDetails);
             Log.i(TAG, geofenceTransitionDetails);
+
+            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                //increment people count
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("PeopleCount");
+                query.whereEqualTo("Place", triggeringGeofences.get(0).getRequestId());
+                query.getFirstInBackground(new GetCallback<ParseObject>() {
+                    public void done(ParseObject object, ParseException e) {
+                        if (e == null) {
+                            int count = object.getInt("People");
+                            ++count;
+                            object.put("People", count);
+                            object.saveInBackground();
+                        } else {
+                            int count = object.getInt("People");
+                            --count;
+                            object.put("People", count);
+                            object.saveInBackground();
+                        }
+                    }
+                });
+            } else {
+                //decrement people count
+            }
         } else {
             // Log the error.
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
