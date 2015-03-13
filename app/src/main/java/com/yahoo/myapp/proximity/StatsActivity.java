@@ -27,7 +27,8 @@ import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
-import org.w3c.dom.Text;
+
+import java.util.Arrays;
 
 
 public class StatsActivity extends ActionBarActivity {
@@ -133,7 +134,11 @@ public class StatsActivity extends ActionBarActivity {
                     EditText timeEt = (EditText) mLayoutAddGeofence.findViewById(R.id.editText3);
                     String time = timeEt.getText().toString();
 
-                    //
+                    //add to backend
+                    final ParseObject placeCount = new ParseObject("PeopleCount");
+                    placeCount.put("Place", name);
+                    placeCount.put("People", 10); //starting bar
+                    placeCount.saveInBackground();
 
                     Intent i = new Intent(StatsActivity.this, MapActivity.class);
                     i.putExtra("Place", name);
