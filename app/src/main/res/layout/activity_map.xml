@@ -5,7 +5,7 @@
 
     <Button android:layout_width="100dp" android:layout_height="100dp"
             android:background="@mipmap/ic_launcher"
-            android:id="@+id/btn_open_stats"
+            android:id="@+id/btn_list_places"
             />
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"

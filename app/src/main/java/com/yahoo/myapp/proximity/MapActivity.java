@@ -77,7 +77,7 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
         mGeofencePendingIntent = null;
 
-        Button goToStats = (Button) findViewById(R.id.btn_open_stats);
+        Button goToStats = (Button) findViewById(R.id.btn_list_places);
         goToStats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,6 +176,7 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
                             double lat = object.getInt("Lat");
                             double lng = object.getInt("Lng");
                             mPointsOfInterest.put((String)object.get("Name"), new LatLng(lat, lng));
+                            startGeofencing();
                         } else {
                             //error
                         }
@@ -193,17 +194,21 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
                 mPointsOfInterest.put(placeName, latLng);
             }
 
-            if (mPointsOfInterest.size() > 0) {
-                createGeoFences();
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        getGeofencingRequest(),
-                        getGeofencePendingIntent()
-                ).setResultCallback(MapActivity.this);
-            }
+            startGeofencing();
         }
         createLocationRequest();
         startLocationUpdates();
+    }
+
+    private void startGeofencing() {
+        if (mPointsOfInterest.size() > 0) {
+            createGeoFences();
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(MapActivity.this);
+        }
     }
 
     @Override
