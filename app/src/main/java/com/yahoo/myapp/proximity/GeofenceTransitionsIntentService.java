@@ -112,7 +112,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         int count = object.getInt("People");
                         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                             count+=2; //demo see bigger jump
-                        } else {
+                        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                             count-=2;
                         }
                         object.put("People", count);

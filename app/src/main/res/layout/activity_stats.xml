@@ -16,10 +16,16 @@
             android:text="My Place"
             android:id="@+id/placeTitle"
             android:layout_marginBottom="10dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:layout_centerHorizontal="true"
+              android:text="#"
+              android:id="@+id/people_count"
+              android:layout_marginBottom="10dp"
+            android:layout_below="@id/placeTitle"/>
 
     <FrameLayout android:layout_width="match_parent"
                  android:layout_height="wrap_content"
             android:id="@+id/chart"
-            android:layout_below="@id/placeTitle"></FrameLayout>
+            android:layout_below="@id/people_count"></FrameLayout>
 
 </RelativeLayout>

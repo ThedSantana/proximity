@@ -35,7 +35,9 @@ public class ListPlacesActivity extends ActionBarActivity {
             @Override
             public void done(List<ParseObject> parseObjects, ParseException e) {
                 for (ParseObject parseObject : parseObjects) {
-                    mPlaces.add((String) parseObject.get("Name"));
+                    if (!mPlaces.contains((String) parseObject.get("Name"))) {
+                        mPlaces.add((String) parseObject.get("Name"));
+                    }
                     mPlacesAdapter = new PlacesAdapter(ListPlacesActivity.this,
                             R.layout.item_place, mPlaces);
                     mLvPlaces.setAdapter(mPlacesAdapter);

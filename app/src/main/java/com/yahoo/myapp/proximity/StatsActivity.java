@@ -44,7 +44,7 @@ public class StatsActivity extends ActionBarActivity {
 
     private XYSeriesRenderer mCurrentRenderer;
 
-    private int mCount = 30;
+    private int mCount;
 
     private TextView mTvPlaceTitle;
 
@@ -91,9 +91,8 @@ public class StatsActivity extends ActionBarActivity {
             if (extra != null) {
                 mTvPlaceTitle.setText(extra);
                 retrieveParseObject(extra);
-                mCurrentSeries.clear();
-                addSampleData();
-                mChart.repaint();
+
+
             }
         }
     }
@@ -162,6 +161,11 @@ public class StatsActivity extends ActionBarActivity {
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
                     mCount = object.getInt("People");
+                    TextView count = (TextView) findViewById(R.id.people_count);
+                    count.setText(mCount + "");
+                    mCurrentSeries.clear();
+                    addSampleData();
+                    mChart.repaint();
                 } else {
                     //
                 }
