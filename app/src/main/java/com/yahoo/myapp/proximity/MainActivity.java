@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 
+import java.util.Map;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -15,7 +17,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void customer(View v) {
-        Intent i = new Intent(this, UserLandingActivity.class);
+        Intent i = new Intent(this, MapActivity.class);
         startActivity(i);
     }
 

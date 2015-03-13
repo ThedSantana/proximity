@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.yahoo.myapp.proximity.StatsActivity">
+    <item android:id="@+id/view_places"
+          android:title="View Points of Interest"
+          android:orderInCategory="100"
+          app:showAsAction="ifRoom|collapseActionView"/>
+</menu>

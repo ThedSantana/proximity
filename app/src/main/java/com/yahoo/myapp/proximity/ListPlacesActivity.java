@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UserLandingActivity extends ActionBarActivity {
+public class ListPlacesActivity extends ActionBarActivity {
 
     List<String> mPlaces;
     PlacesAdapter mPlacesAdapter;
@@ -27,7 +27,7 @@ public class UserLandingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_landing);
+        setContentView(R.layout.activity_list_places);
         mLvPlaces = (ListView) findViewById(R.id.lvPlaces);
         mPlaces = new ArrayList<String>();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Places");
@@ -36,7 +36,7 @@ public class UserLandingActivity extends ActionBarActivity {
             public void done(List<ParseObject> parseObjects, ParseException e) {
                 for (ParseObject parseObject : parseObjects) {
                     mPlaces.add((String) parseObject.get("Name"));
-                    mPlacesAdapter = new PlacesAdapter(UserLandingActivity.this,
+                    mPlacesAdapter = new PlacesAdapter(ListPlacesActivity.this,
                             R.layout.item_place, mPlaces);
                     mLvPlaces.setAdapter(mPlacesAdapter);
                 }
@@ -46,7 +46,7 @@ public class UserLandingActivity extends ActionBarActivity {
         mLvPlaces.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(UserLandingActivity.this, StatsActivity.class);
+                Intent i = new Intent(ListPlacesActivity.this, StatsActivity.class);
                 i.putExtra("placetitle", mPlaces.get(position));
                 startActivity(i);
             }

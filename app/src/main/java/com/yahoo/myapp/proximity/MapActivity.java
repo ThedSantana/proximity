@@ -6,6 +6,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -25,6 +27,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +54,7 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
     private int mCounter = 0;
 
     private ArrayList<Geofence> mGeofenceList;
-    private Map<String, Location> mPointsOfInterest;
+    private Map<String, LatLng> mPointsOfInterest;
 
     private Button createGeofences;
 
@@ -55,6 +62,8 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
 
     private String placeName;
     private int placeRadius;
+
+    private boolean isCustomer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +73,7 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
         setUpMapIfNeeded();
         placeName = getIntent().getStringExtra("Place");
         placeRadius = getIntent().getIntExtra("Radius", 100);
-        mPointsOfInterest = new HashMap<String, Location>();
+        mPointsOfInterest = new HashMap<String, LatLng>();
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
         mGeofencePendingIntent = null;
 
@@ -72,11 +81,13 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
         goToStats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MapActivity.this, StatsActivity.class);
-                i.putExtra("placetitle", placeName);
+                Intent i = new Intent(MapActivity.this, ListPlacesActivity.class);
+                //i.putExtra("placetitle", placeName);
                 startActivity(i);
             }
         });
+
+
     }
 
     @Override
@@ -150,17 +161,46 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
         if (mLastLocation != null) {
             LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(latLng.latitude, latLng.longitude))
+                    .position(latLng)
                     .title("Marker" + mCounter));
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
             mMap.animateCamera(cameraUpdate);
 
-            createGeoFences();
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    getGeofencingRequest(),
-                    getGeofencePendingIntent()
-            ).setResultCallback(MapActivity.this);
+            if (placeName == null) {
+                isCustomer = true;
+                //retrieve geofence places and create
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Places");
+                query.getFirstInBackground(new GetCallback<ParseObject>() {
+                    public void done(ParseObject object, ParseException e) {
+                        if (e == null) {
+                            double lat = object.getInt("Lat");
+                            double lng = object.getInt("Lng");
+                            mPointsOfInterest.put((String)object.get("Name"), new LatLng(lat, lng));
+                        } else {
+                            //error
+                        }
+                    }
+                });
+
+            } else {
+                //is owner so add POI in table
+                ParseObject parseObject = new ParseObject("Places");
+                parseObject.put("Name", placeName);
+                parseObject.put("Radius", placeRadius);
+                parseObject.put("Lat", latLng.latitude);
+                parseObject.put("Lng", latLng.longitude);
+                parseObject.saveInBackground();
+                mPointsOfInterest.put(placeName, latLng);
+            }
+
+            if (mPointsOfInterest.size() > 0) {
+                createGeoFences();
+                LocationServices.GeofencingApi.addGeofences(
+                        mGoogleApiClient,
+                        getGeofencingRequest(),
+                        getGeofencePendingIntent()
+                ).setResultCallback(MapActivity.this);
+            }
         }
         createLocationRequest();
         startLocationUpdates();
@@ -202,18 +242,17 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
     }
 
     private void createGeoFences() {
-        mPointsOfInterest.put(placeName, mLastLocation);
         mGeofenceList = new ArrayList<Geofence>(mPointsOfInterest.size());
-        Iterator<Map.Entry<String, Location>> iter = mPointsOfInterest.entrySet().iterator();
+        Iterator<Map.Entry<String, LatLng>> iter = mPointsOfInterest.entrySet().iterator();
         while(iter.hasNext()) {
-            Map.Entry<String, Location> entry = iter.next();
+            Map.Entry<String, LatLng> entry = iter.next();
             mGeofenceList.add(new Geofence.Builder()
                     // Set the request ID of the geofence. This is a string to identify this
                     // geofence.
                     .setRequestId(entry.getKey())
                     .setCircularRegion(
-                            entry.getValue().getLatitude(),
-                            entry.getValue().getLongitude(),
+                            entry.getValue().latitude,
+                            entry.getValue().longitude,
                             placeRadius
                     )
                     .setExpirationDuration(60000)
@@ -248,5 +287,22 @@ public class MapActivity extends FragmentActivity implements GoogleApiClient.Con
     public void onResult(Result result) {
         //TODO Parse add entry
         Toast.makeText(this, "Service result=" + result.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_customer, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.view_places) {
+            Intent i = new Intent(this, ListPlacesActivity.class);
+            startActivity(i);
+        }
+        return true;
     }
 }

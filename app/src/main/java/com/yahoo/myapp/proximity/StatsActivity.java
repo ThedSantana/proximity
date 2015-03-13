@@ -133,10 +133,7 @@ public class StatsActivity extends ActionBarActivity {
                     EditText timeEt = (EditText) mLayoutAddGeofence.findViewById(R.id.editText3);
                     String time = timeEt.getText().toString();
 
-                    ParseObject parseObject = new ParseObject("Places");
-                    parseObject.put("Name", name);
-                    parseObject.put("Radius", radius);
-                    parseObject.saveInBackground();
+                    //
 
                     Intent i = new Intent(StatsActivity.this, MapActivity.class);
                     i.putExtra("Place", name);
